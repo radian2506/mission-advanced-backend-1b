@@ -1,13 +1,44 @@
 const pool = require('../config/database');
 
-const getAllSeriesFilm = async () => {
-  const { rows } = await pool.query(`
+const getAllSeriesFilm = async ({ search, filter, sort, order } = {}) => {
+  let query = `
     SELECT sf.*, COALESCE(json_agg(json_build_object('id',g.id,'nama_genre',g.nama_genre,'slug',g.slug)) FILTER (WHERE g.id IS NOT NULL),'[]') AS genres
     FROM series_film sf
     LEFT JOIN series_genre sg ON sf.id = sg.series_film_id
     LEFT JOIN genre g ON sg.genre_id = g.id
-    GROUP BY sf.id ORDER BY sf.created_at DESC
-  `);
+    WHERE 1=1
+  `;
+  const params = [];
+
+  if (search) {
+    params.push(`%${search}%`);
+    query += ` AND (sf.judul ILIKE $${params.length} OR sf.sinopsis ILIKE $${params.length} OR sf.sutradara ILIKE $${params.length})`;
+  }
+
+  if (filter?.tipe && ['series','film'].includes(filter.tipe)) {
+    params.push(filter.tipe);
+    query += ` AND sf.tipe = $${params.length}`;
+  }
+
+  if (filter?.status_tayang && ['tayang','selesai','akan_tayang'].includes(filter.status_tayang)) {
+    params.push(filter.status_tayang);
+    query += ` AND sf.status_tayang = $${params.length}`;
+  }
+
+  if (filter?.eksklusif !== undefined) {
+    params.push(filter.eksklusif === 'true');
+    query += ` AND sf.eksklusif = $${params.length}`;
+  }
+
+  query += ` GROUP BY sf.id`;
+
+  const allowedSort  = ['judul','tahun_rilis','imdb_score','created_at'];
+  const allowedOrder = ['ASC','DESC'];
+  const sortBy  = allowedSort.includes(sort)          ? sort          : 'created_at';
+  const orderBy = allowedOrder.includes(order?.toUpperCase()) ? order.toUpperCase() : 'DESC';
+  query += ` ORDER BY sf.${sortBy} ${orderBy}`;
+
+  const { rows } = await pool.query(query, params);
   return rows;
 };
 

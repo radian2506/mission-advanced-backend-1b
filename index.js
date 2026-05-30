@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express');
+const path    = require('path');
 const routes  = require('./src/routes/index');
+const authRoutes = require('./src/routes/auth');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -16,11 +18,14 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.get('/', (req, res) => {
-  res.json({ status: 'success', message: '🎬 Chill Streaming API is running', version: '1.0.0' });
+  res.json({ status: 'success', message: '🎬 Chill Streaming API is running', version: '2.0.0' });
 });
 
 app.use('/api', routes);
+app.use('/api/auth', authRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ status: 'error', message: `Route ${req.originalUrl} tidak ditemukan` });

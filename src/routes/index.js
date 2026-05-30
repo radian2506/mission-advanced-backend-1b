@@ -1,7 +1,8 @@
 const express = require('express');
 const router  = express.Router();
 const userCtrl = require('../controllers/user.controller');
-const { genreCtrl, paketCtrl, seriesFilmCtrl, episodeCtrl, orderCtrl, pembayaranCtrl, daftarSayaCtrl } = require('../controllers/index.controller');
+const sfCtrl   = require('../controllers/seriesFilm.controller');
+const { genreCtrl, paketCtrl, episodeCtrl, orderCtrl, pembayaranCtrl, daftarSayaCtrl } = require('../controllers/index.controller');
 
 router.get   ('/users',                           userCtrl.getAll);
 router.get   ('/users/:id',                       userCtrl.getById);
@@ -21,11 +22,11 @@ router.post  ('/paket',                           paketCtrl.create);
 router.patch ('/paket/:id',                       paketCtrl.update);
 router.delete('/paket/:id',                       paketCtrl.remove);
 
-router.get   ('/series-film',                     seriesFilmCtrl.getAll);
-router.get   ('/series-film/:id',                 seriesFilmCtrl.getById);
-router.post  ('/series-film',                     seriesFilmCtrl.create);
-router.patch ('/series-film/:id',                 seriesFilmCtrl.update);
-router.delete('/series-film/:id',                 seriesFilmCtrl.remove);
+router.get   ('/series-film',                     sfCtrl.getAll);
+router.get   ('/series-film/:id',                 sfCtrl.getById);
+router.post  ('/series-film',                     sfCtrl.create);
+router.patch ('/series-film/:id',                 sfCtrl.update);
+router.delete('/series-film/:id',                 sfCtrl.remove);
 
 router.get   ('/episodes',                        episodeCtrl.getAll);
 router.get   ('/episodes/:id',                    episodeCtrl.getById);
